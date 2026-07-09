@@ -1,0 +1,43 @@
+name: Download CNNIC Delete Domain List
+
+on:
+  schedule:
+    # 每天北京时间 06:00 执行（UTC 22:00）
+    - cron: "0 22 * * *"
+  workflow_dispatch:
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set date (Asia/Shanghai)
+        run: |
+          export TZ="Asia/Shanghai"
+          TODAY=$(date +"%Y-%m-%d")
+          echo "TODAY=$TODAY" >> $GITHUB_ENV
+
+      - name: Download CNNIC delete lists
+        run: |
+          mkdir -p data
+
+          curl -o "data/${TODAY}_todayDel.txt" \
+            https://www.cnnic.cn/NMediaFile/domain_list/1todayDel.txt
+
+          curl -o "data/${TODAY}_future1todayDel.txt" \
+            https://www.cnnic.cn/NMediaFile/domain_list/future1todayDel.txt
+
+          curl -o "data/${TODAY}_future2todayDel.txt" \
+            https://www.cnnic.cn/NMediaFile/domain_list/future2todayDel.txt
+
+      - name: Commit & Push
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+          git add data/
+          git commit -m "CNNIC delete list for ${TODAY}"
+          git push
