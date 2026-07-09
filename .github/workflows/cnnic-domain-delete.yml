@@ -6,6 +6,9 @@ on:
     - cron: "0 22 * * *"
   workflow_dispatch:
 
+permissions:
+  contents: write   # 关键：允许 GITHUB_TOKEN 推送代码
+
 jobs:
   download:
     runs-on: ubuntu-latest
@@ -39,5 +42,5 @@ jobs:
           git config --global user.email "github-actions@github.com"
 
           git add data/
-          git commit -m "CNNIC delete list for ${TODAY}"
+          git commit -m "CNNIC delete list for ${TODAY}" || echo "No changes to commit"
           git push
